@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #c6c6e2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.5s;
+    }
+    .quiz-container {
+      background: #ebd0d0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 4px 8px 8px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      transition: transform 0.3s ease-in-out;
+    }
+    .quiz-container:hover {
+      transform: scale(1.02);
+    }
+    .question {
+      margin-bottom: 20px;
+      font-size: 20px;
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    .answers button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      background: #303c4791;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .answers button:hover {
+      transform: scale(1.05);
+    }
+    .answers button.selected {
+      background: #28a745 !important;
+    }
+    .answers button.correct {
+      background: #28a745 !important;
+    }
+    .answers button.wrong {
+      background: #dc3545 !important;
+    }
+    .hidden {
+      display: none;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .buttons button {
+      padding: 10px;
+      background: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .buttons button:hover {
+      background: #003d80;
+      transform: scale(1.05);
+    }
+    #submit {
+      padding: 12px;
+      background: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      transition: background 0.3s, transform 0.2s;
+    }
+    #submit:hover {
+      background: #e68900;
+      transform: scale(1.05);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h2 id="question">Question Text</h2>
+    <div class="answers">
+      <button class="answer" data-option="a">Answer 1</button>
+      <button class="answer" data-option="b">Answer 2</button>
+      <button class="answer" data-option="c">Answer 3</button>
+      <button class="answer" data-option="d">Answer 4</button>
+    </div>
+    <div class="buttons">
+      <button id="prev" class="hidden">Previous</button>
+      <button id="next">Next</button>
+    </div>
+    <button id="submit" class="hidden">Submit</button>
+    <div id="result" class="hidden result"></div>
+  </div>
+  <script>
+    const quizData = [
+      { question: "What is the capital of France?", a: "Berlin", b: "Madrid", c: "Paris", d: "Rome", correct: "c" },
+      { question: "Which programming language is known as the backbone of the web?", a: "Python", b: "JavaScript", c: "Java", d: "C++", correct: "b" },
+      { question: "What is 2 + 2?", a: "3", b: "4", c: "5", d: "6", correct: "b" },
+      { question: "Who wrote 'Pride and Prejudice'?", a: "Jane Austen", b: "Mark Twain", c: "Charles Dickens", d: "J.K. Rowling", correct: "a" }
+    ];
+
+    let currentQuiz = 0;
+    let userAnswers = {};
+    let score = 0;
+
+    const questionEl = document.getElementById("question");
+    const answerButtons = document.querySelectorAll(".answer");
+    const nextButton = document.getElementById("next");
+    const prevButton = document.getElementById("prev");
+    const submitButton = document.getElementById("submit");
+    const resultEl = document.getElementById("result");
+
+    function loadQuiz() {
+      const currentQuizData = quizData[currentQuiz];
+      questionEl.textContent = currentQuizData.question;
+      answerButtons.forEach((button) => {
+        const option = button.getAttribute("data-option");
+        button.textContent = currentQuizData[option];
+        button.classList.remove("selected", "correct", "wrong");
+        if (userAnswers[currentQuiz] === option) {
+          button.classList.add("selected");
+        }
+        button.onclick = () => {
+          userAnswers[currentQuiz] = option;
+          answerButtons.forEach(btn => btn.classList.remove("selected"));
+          button.classList.add("selected");
+        };
+      });
+      prevButton.classList.toggle("hidden", currentQuiz === 0);
+      nextButton.classList.toggle("hidden", currentQuiz === quizData.length - 1);
+      submitButton.classList.toggle("hidden", currentQuiz !== quizData.length - 1);
+    }
+    
+    nextButton.onclick = () => { currentQuiz++; loadQuiz(); };
+    prevButton.onclick = () => { currentQuiz--; loadQuiz(); };
+    
+    submitButton.onclick = () => {
+      answerButtons.forEach((button) => {
+        const option = button.getAttribute("data-option");
+        if (quizData[currentQuiz].correct === option) {
+          button.classList.add("correct");
+        } else if (userAnswers[currentQuiz] === option) {
+          button.classList.add("wrong");
+        }
+      });
+      score = Object.keys(userAnswers).filter(q => userAnswers[q] === quizData[q].correct).length;
+      resultEl.textContent = `You scored ${score}/${quizData.length}`;
+      resultEl.classList.remove("hidden");
+    };
+    
+    loadQuiz();
+  </script>
+</body>
+</html>
